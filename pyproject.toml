@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "calibre-template-functions"
+version = "0.1.0"
+description = ""
+authors = ["Nathan Dines <nathandines@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+ruff = "^0.1.13"
+
+[tool.ruff]
+extend-select = ["I"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
