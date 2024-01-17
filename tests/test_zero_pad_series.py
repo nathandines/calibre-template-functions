@@ -25,7 +25,7 @@ class NumberTestData:
 @dataclass
 class BookLookupTestData:
     series_name: str
-    db_result: list[Book]
+    db_result: list[CalibreBook]
     expected_output: set[Book]
 
 
