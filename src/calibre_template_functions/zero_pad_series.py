@@ -17,17 +17,11 @@ class CalibreDbApi:
 
 
 class CalibreDb(ABC):
-    @property
-    @abstractmethod
-    def new_api(self) -> CalibreDbApi:
-        ...
+    new_api: CalibreDbApi
 
 
 class CalibreContext(ABC):
-    @property
-    @abstractmethod
-    def arguments(self) -> List[str]:
-        ...
+    arguments: List[str]
 
     @property
     @abstractmethod
@@ -36,15 +30,8 @@ class CalibreContext(ABC):
 
 
 class CalibreBook(ABC):
-    @property
-    @abstractmethod
-    def series(self) -> Optional[str]:
-        ...
-
-    @property
-    @abstractmethod
-    def series_index(self) -> str:
-        ...
+    series: Optional[str]
+    series_index: str
 
 
 @dataclass
