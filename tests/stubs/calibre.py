@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from calibre_template_functions.zero_pad_series import (
     CalibreBook,
@@ -25,10 +25,8 @@ class DbApi(CalibreDbApi):
 
     def field_for(
         self, field_name: str, book_id: int, default_return: Optional[str] = None
-    ) -> Union[str, int, float, None]:
-        return_val: Union[str, int, float, None] = getattr(
-            self.search_result[book_id], field_name
-        )
+    ) -> Optional[str]:
+        return_val: Optional[str] = getattr(self.search_result[book_id], field_name)
         if return_val:
             return return_val
         return default_return
