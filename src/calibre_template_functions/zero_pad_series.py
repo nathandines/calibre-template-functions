@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import List, Optional, Set, SupportsRound, Union
 
 
-class CalibreDbApi:
+class CalibreDbApi(ABC):
     @abstractmethod
     def search(self, query: str) -> List[int]:
         pass
