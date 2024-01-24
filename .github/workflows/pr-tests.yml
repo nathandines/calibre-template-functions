@@ -1,0 +1,18 @@
+---
+on:
+  - pull_request
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - run: pip install poetry
+      - run: poetry install
+      - run: poetry run mypy .
+      - run: poetry run ruff check .
+      - run: poetry run ruff format --check .
+      - run: poetry run pytest -v
