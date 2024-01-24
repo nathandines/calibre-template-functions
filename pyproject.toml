@@ -19,6 +19,7 @@ extend-select = ["I"]
 [tool.mypy]
 disallow_untyped_defs = true
 check_untyped_defs = true
+disallow_any_expr = true
 
 [build-system]
 requires = ["poetry-core"]
