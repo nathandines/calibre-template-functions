@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import List, Set
 
 from calibre_template_functions.zero_pad_series import (
     Book,
@@ -10,9 +11,9 @@ from calibre_template_functions.zero_pad_series import (
     print_result,
 )
 
-from .stubs.calibre import DB as CalibreDB
 from .stubs.calibre import Book as CalibreBook
 from .stubs.calibre import Context as CalibreContext
+from .stubs.calibre import DbApi as CalibreDB
 
 
 @dataclass
@@ -25,18 +26,18 @@ class NumberTestData:
 @dataclass
 class BookLookupTestData:
     series_name: str
-    db_result: list[CalibreBook]
-    expected_output: set[Book]
+    db_result: List[CalibreBook]
+    expected_output: Set[Book]
 
 
 @dataclass
 class EvaluateTestData:
     book: CalibreBook
-    search_results: list[CalibreBook]
+    search_results: List[CalibreBook]
     expected_result: str
 
 
-number_input_list: list[NumberTestData] = [
+number_input_list: List[NumberTestData] = [
     NumberTestData(dec=Decimal("123"), expected_whole_digits=3, expected_dec_places=0),
     NumberTestData(
         dec=Decimal("0.0000"), expected_whole_digits=1, expected_dec_places=0
@@ -71,15 +72,15 @@ number_input_list: list[NumberTestData] = [
 
 
 class TestZeroPadSeries:
-    def test_count_decimal_places(self):
+    def test_count_decimal_places(self) -> None:
         for number in number_input_list:
             assert count_decimal_places(number.dec) == number.expected_dec_places
 
-    def test_count_whole_digits(self):
+    def test_count_whole_digits(self) -> None:
         for number in number_input_list:
             assert count_whole_digits(number.dec) == number.expected_whole_digits
 
-    def test_print_result(self):
+    def test_print_result(self) -> None:
         assert print_result(Decimal("1"), 2, 2) == "01"
         assert print_result(Decimal("1"), 1, 2) == "1"
         assert print_result(Decimal("14"), 0, 2) == "14"
@@ -92,20 +93,20 @@ class TestZeroPadSeries:
         assert print_result(Decimal("1.1264"), 1, 4) == "1.1264"
         assert print_result(Decimal("1.12"), 1, 4) == "1.1200"
 
-    def test_get_books_in_series(self):
-        assertions: list[BookLookupTestData] = [
+    def test_get_books_in_series(self) -> None:
+        assertions: List[BookLookupTestData] = [
             BookLookupTestData(
                 series_name="Harry Potter",
                 db_result=[
                     CalibreBook(
                         title="Harry Potter and the Philosopher's Stone",
                         series="Harry Potter",
-                        series_index=1,
+                        series_index=str(1),
                     ),
                     CalibreBook(
                         title="Harry Potter and the Chamber of Secrets",
                         series="Harry Potter",
-                        series_index=2,
+                        series_index=str(2),
                     ),
                 ],
                 expected_output={
@@ -130,12 +131,12 @@ class TestZeroPadSeries:
                     CalibreBook(
                         title="Sword of Destiny",
                         series="The Witcher",
-                        series_index=0.6999999,
+                        series_index=str(0.6999999),
                     ),
                     CalibreBook(
                         title="The Tower of the Swallow",
                         series="The Witcher",
-                        series_index=4,
+                        series_index=str(4),
                     ),
                 ],
                 expected_output={
@@ -159,12 +160,12 @@ class TestZeroPadSeries:
                     CalibreBook(
                         title="Eye of the World",
                         series="The Wheel of Time",
-                        series_index=1,
+                        series_index=str(1),
                     ),
                     CalibreBook(
                         title="A Memory of Light",
                         series="The Wheel of Time",
-                        series_index=14,
+                        series_index=str(14),
                     ),
                 ],
                 expected_output={
@@ -192,8 +193,8 @@ class TestZeroPadSeries:
                 == assertion.expected_output
             )
 
-    def test_evaluate(self):
-        assertions: list[EvaluateTestData] = [
+    def test_evaluate(self) -> None:
+        assertions: List[EvaluateTestData] = [
             EvaluateTestData(
                 book=CalibreBook(title="The Count of Monte Cristo"),
                 search_results=[CalibreBook(title="The Count of Monte Cristo")],
@@ -201,18 +202,20 @@ class TestZeroPadSeries:
             ),
             EvaluateTestData(
                 book=CalibreBook(
-                    title="Eye of the World", series="The Wheel of Time", series_index=1
+                    title="Eye of the World",
+                    series="The Wheel of Time",
+                    series_index=str(1),
                 ),
                 search_results=[
                     CalibreBook(
                         title="Eye of the World",
                         series="The Wheel of Time",
-                        series_index=1,
+                        series_index=str(1),
                     ),
                     CalibreBook(
                         title="A Memory of Light",
                         series="The Wheel of Time",
-                        series_index=14,
+                        series_index=str(14),
                     ),
                 ],
                 expected_result="01",
@@ -221,18 +224,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="A Memory of Light",
                     series="The Wheel of Time",
-                    series_index=14,
+                    series_index=str(14),
                 ),
                 search_results=[
                     CalibreBook(
                         title="Eye of the World",
                         series="The Wheel of Time",
-                        series_index=1,
+                        series_index=str(1),
                     ),
                     CalibreBook(
                         title="A Memory of Light",
                         series="The Wheel of Time",
-                        series_index=14,
+                        series_index=str(14),
                     ),
                 ],
                 expected_result="14",
@@ -241,18 +244,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="Sword of Destiny",
                     series="The Witcher",
-                    series_index=0.6999999999,
+                    series_index=str(0.6999999999),
                 ),
                 search_results=[
                     CalibreBook(
                         title="Sword of Destiny",
                         series="The Witcher",
-                        series_index=0.6999999999,
+                        series_index=str(0.6999999999),
                     ),
                     CalibreBook(
                         title="The Tower of the Swallow",
                         series="The Witcher",
-                        series_index=4,
+                        series_index=str(4),
                     ),
                 ],
                 expected_result="0.7",
@@ -261,18 +264,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="The Pumpkin of Destiny",
                     series="The Pumpkin Chronicles",
-                    series_index=0.75,
+                    series_index=str(0.75),
                 ),
                 search_results=[
                     CalibreBook(
                         title="The Pumpkin of Destiny",
                         series="The Pumpkin Chronicles",
-                        series_index=0.75,
+                        series_index=str(0.75),
                     ),
                     CalibreBook(
                         title="The Seeds of Regret",
                         series="The Pumpkin Chronicles",
-                        series_index=328,
+                        series_index=str(328),
                     ),
                 ],
                 expected_result="000.75",
@@ -281,18 +284,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="The Seeds of Regret",
                     series="The Pumpkin Chronicles",
-                    series_index=328,
+                    series_index=str(328),
                 ),
                 search_results=[
                     CalibreBook(
                         title="The Pumpkin of Destiny",
                         series="The Pumpkin Chronicles",
-                        series_index=0.75,
+                        series_index=str(0.75),
                     ),
                     CalibreBook(
                         title="The Seeds of Regret",
                         series="The Pumpkin Chronicles",
-                        series_index=328,
+                        series_index=str(328),
                     ),
                 ],
                 expected_result="328",
@@ -301,13 +304,13 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="The Pumpkin of Destiny",
                     series="The Pumpkin Chronicles",
-                    series_index=0.254,
+                    series_index=str(0.254),
                 ),
                 search_results=[
                     CalibreBook(
                         title="The Pumpkin of Destiny",
                         series="The Pumpkin Chronicles",
-                        series_index=0.254,
+                        series_index=str(0.254),
                     ),
                 ],
                 expected_result="0.25",
@@ -319,20 +322,20 @@ class TestZeroPadSeries:
                 evaluate(
                     book=assertion.book,
                     context=CalibreContext(
-                        arguments=[assertion.book.series_index or ""],
+                        arguments=[str(assertion.book.series_index) or ""],
                         calibre_db=CalibreDB(search_result=assertion.search_results),
                     ),
                 )
                 == assertion.expected_result
             )
 
-    def test_evaluate_without_arguments(self):
+    def test_evaluate_without_arguments(self) -> None:
         assert (
             evaluate(
                 book=CalibreBook(
                     title="Eye of the World",
                     series="The Wheel of Time",
-                    series_index=1,
+                    series_index=str(1),
                 ),
                 context=CalibreContext(
                     calibre_db=CalibreDB(
@@ -340,12 +343,12 @@ class TestZeroPadSeries:
                             CalibreBook(
                                 title="Eye of the World",
                                 series="The Wheel of Time",
-                                series_index=1,
+                                series_index=str(1),
                             ),
                             CalibreBook(
                                 title="A Memory of Light",
                                 series="The Wheel of Time",
-                                series_index=14,
+                                series_index=str(14),
                             ),
                         ]
                     )
@@ -354,7 +357,7 @@ class TestZeroPadSeries:
             == ""
         )
 
-    def test_evaluate_without_series(self):
+    def test_evaluate_without_series(self) -> None:
         assert (
             evaluate(
                 book=CalibreBook(title="The Count of Monte Cristo"),

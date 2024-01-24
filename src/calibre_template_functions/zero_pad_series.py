@@ -1,15 +1,60 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import List, Optional, Set, Union
+
+
+class CalibreDbApi:
+    @abstractmethod
+    def search(self, query: str) -> List[int]:
+        ...
+
+    @abstractmethod
+    def field_for(
+        self, field_name: str, book_id: int, default_return: Optional[str] = None
+    ) -> Union[str, int, float, None]:
+        ...
+
+
+class CalibreDb(ABC):
+    @property
+    @abstractmethod
+    def new_api(self) -> CalibreDbApi:
+        ...
+
+
+class CalibreContext(ABC):
+    @property
+    @abstractmethod
+    def arguments(self) -> List[str]:
+        ...
+
+    @property
+    @abstractmethod
+    def db(self) -> CalibreDb:
+        ...
+
+
+class CalibreBook(ABC):
+    @property
+    @abstractmethod
+    def series(self) -> Optional[str]:
+        ...
+
+    @property
+    @abstractmethod
+    def series_index(self) -> str:
+        ...
 
 
 @dataclass
 class Book:
     identifier: int
     title: str
-    series: str | None
-    series_index: Decimal | None
+    series: Optional[str] = None
+    series_index: Optional[Decimal] = None
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return self.identifier
 
 
@@ -26,44 +71,41 @@ def print_result(number: Decimal, zero_padding: int, decimal_places: int) -> str
 
 def count_decimal_places(number: Decimal) -> int:
     """Count decimal places to a max of two places"""
-    return abs(round(number, 2).normalize().as_tuple().exponent)
+    return abs(int(round(number, int(2)).normalize().as_tuple().exponent))
 
 
 def count_whole_digits(number: Decimal) -> int:
     """Count whole digits. Minimum of one place returned, even for zero values."""
     num_tuple = number.normalize().as_tuple()
-    digits = (
-        num_tuple.digits
-        if num_tuple.exponent == 0
-        else num_tuple.digits[: num_tuple.exponent]
-    )
+    exponent = int(num_tuple.exponent)
+    digits = num_tuple.digits if exponent == 0 else num_tuple.digits[:exponent]
     return max(1, len(digits))
 
 
-def get_books_in_series(calibre_db, series_name: str) -> set[Book]:
-    book_ids = calibre_db.search(f'series:"={series_name}"', "")
+def get_books_in_series(calibre_db: CalibreDbApi, series_name: str) -> Set[Book]:
+    book_ids = calibre_db.search(f'series:"={series_name}"')
     output = set()
     for book_id in book_ids:
         series_index = calibre_db.field_for("series_index", book_id, "")
         output.add(
             Book(
                 identifier=book_id,
-                title=calibre_db.field_for("title", book_id, ""),
-                series=calibre_db.field_for("series", book_id, "") or None,
+                title=str(calibre_db.field_for("title", book_id, "")),
+                series=str(calibre_db.field_for("series", book_id, "")) or None,
                 series_index=Decimal(series_index) if series_index else None,
             )
         )
     return output
 
 
-def evaluate(book, context):
+def evaluate(book: CalibreBook, context: CalibreContext) -> str:
     if not context.arguments[0]:
         return ""
     if book.series is None:
         return ""
     number = Decimal(context.arguments[0])
     calibre_db = context.db.new_api
-    books: set[Book] = get_books_in_series(calibre_db, book.series)
+    books: Set[Book] = get_books_in_series(calibre_db, book.series)
     zero_padding = max(
         {
             count_whole_digits(book.series_index) if book.series_index else 0
