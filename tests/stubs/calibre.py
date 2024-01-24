@@ -26,9 +26,11 @@ class DbApi(CalibreDbApi):
     def field_for(
         self, field_name: str, book_id: int, default_return: Optional[str] = None
     ) -> Union[str, int, float, None]:
-        return_val = getattr(self.search_result[book_id], field_name)
+        return_val: Union[str, int, float, None] = getattr(
+            self.search_result[book_id], field_name
+        )
         if return_val:
-            return str(return_val)
+            return return_val
         return default_return
 
 

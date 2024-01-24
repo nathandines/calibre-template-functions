@@ -1,19 +1,19 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set, SupportsRound, Union
 
 
 class CalibreDbApi:
     @abstractmethod
     def search(self, query: str) -> List[int]:
-        ...
+        pass
 
     @abstractmethod
     def field_for(
         self, field_name: str, book_id: int, default_return: Optional[str] = None
     ) -> Union[str, int, float, None]:
-        ...
+        pass
 
 
 class CalibreDb(ABC):
@@ -56,9 +56,9 @@ def print_result(number: Decimal, zero_padding: int, decimal_places: int) -> str
     )
 
 
-def count_decimal_places(number: Decimal) -> int:
+def count_decimal_places(number: SupportsRound[Decimal]) -> int:
     """Count decimal places to a max of two places"""
-    return abs(int(round(number, int(2)).normalize().as_tuple().exponent))
+    return abs(int(round(number, 2).normalize().as_tuple().exponent))
 
 
 def count_whole_digits(number: Decimal) -> int:
