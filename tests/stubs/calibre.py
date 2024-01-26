@@ -6,7 +6,7 @@ from typing import List, Optional
 class Book:
     title: str
     series: Optional[str] = None
-    series_index: str = ""
+    series_index: float = 1.0
 
 
 @dataclass

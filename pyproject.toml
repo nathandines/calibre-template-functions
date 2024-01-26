@@ -18,6 +18,8 @@ extend-select = ["I"]
 
 [tool.mypy]
 strict = true
+warn_redundant_casts = true
+warn_unused_ignores = true
 
 [build-system]
 requires = ["poetry-core"]
