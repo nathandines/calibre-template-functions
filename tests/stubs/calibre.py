@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 @dataclass
@@ -18,8 +18,10 @@ class DbApi:
 
     def field_for(
         self, field_name: str, book_id: int, default_return: Optional[str] = None
-    ) -> Optional[str]:
-        return_val: Optional[str] = getattr(self.search_result[book_id], field_name)
+    ) -> Optional[Union[str, float]]:
+        return_val: Optional[Union[str, float]] = getattr(
+            self.search_result[book_id], field_name
+        )
         if return_val:
             return return_val
         return default_return
