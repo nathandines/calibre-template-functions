@@ -1,26 +1,19 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from calibre_template_functions.zero_pad_series import (
-    CalibreBook,
-    CalibreContext,
-    CalibreDb,
-    CalibreDbApi,
-)
-
 
 @dataclass
-class Book(CalibreBook):
+class Book:
     title: str
     series: Optional[str] = None
     series_index: str = ""
 
 
 @dataclass
-class DbApi(CalibreDbApi):
+class DbApi:
     search_result: List[Book]
 
-    def search(self, _query: str) -> List[int]:
+    def search(self, query: str) -> List[int]:
         return [i for i, _book in enumerate(self.search_result)]
 
     def field_for(
@@ -33,12 +26,12 @@ class DbApi(CalibreDbApi):
 
 
 @dataclass
-class Db(CalibreDb):
+class Db:
     new_api: DbApi
 
 
 @dataclass
-class Context(CalibreContext):
+class Context:
     calibre_db: DbApi
     arguments: List[str] = field(default_factory=lambda: [""])
 

@@ -1,37 +1,42 @@
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List, Optional, Set, SupportsRound, Union
+from typing import List, Optional, Protocol, Set, SupportsRound
 
 
-class CalibreDbApi(ABC):
-    @abstractmethod
+class CalibreDbApi(Protocol):
     def search(self, query: str) -> List[int]:
-        pass
+        ...
 
-    @abstractmethod
     def field_for(
         self, field_name: str, book_id: int, default_return: Optional[str] = None
-    ) -> Union[str, int, float, None]:
-        pass
+    ) -> Optional[str]:
+        ...
 
 
-class CalibreDb(ABC):
-    new_api: CalibreDbApi
+class CalibreDb(Protocol):
+    @property
+    def new_api(self) -> CalibreDbApi:
+        ...
 
 
-class CalibreContext(ABC):
-    arguments: List[str]
+class CalibreContext(Protocol):
+    @property
+    def arguments(self) -> List[str]:
+        ...
 
     @property
-    @abstractmethod
     def db(self) -> CalibreDb:
         ...
 
 
-class CalibreBook(ABC):
-    series: Optional[str]
-    series_index: str
+class CalibreBook(Protocol):
+    @property
+    def series(self) -> Optional[str]:
+        ...
+
+    @property
+    def series_index(self) -> str:
+        ...
 
 
 @dataclass
