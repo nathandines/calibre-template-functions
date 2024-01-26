@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List, Set
+from typing import List, Set, Union
 
 from calibre_template_functions.zero_pad_series import (
     Book,
@@ -18,7 +18,7 @@ from .stubs.calibre import DbApi as CalibreDB
 
 @dataclass
 class NumberTestData:
-    dec: Decimal
+    dec: float
     expected_dec_places: int
     expected_whole_digits: int
 
@@ -37,37 +37,56 @@ class EvaluateTestData:
     expected_result: str
 
 
+@dataclass
+class PrintTestData:
+    number: Union[Decimal, float]
+    zero_padding: int
+    decimal_places: int
+    expected_output: str
+
+
 number_input_list: List[NumberTestData] = [
-    NumberTestData(dec=Decimal("123"), expected_whole_digits=3, expected_dec_places=0),
-    NumberTestData(
-        dec=Decimal("0.0000"), expected_whole_digits=1, expected_dec_places=0
-    ),
-    NumberTestData(dec=Decimal("0.70"), expected_whole_digits=1, expected_dec_places=1),
-    NumberTestData(
-        dec=Decimal("0.699"), expected_whole_digits=1, expected_dec_places=1
-    ),
-    NumberTestData(dec=Decimal("0.69"), expected_whole_digits=1, expected_dec_places=2),
-    NumberTestData(
-        dec=Decimal("0.123000"), expected_whole_digits=1, expected_dec_places=2
-    ),
-    NumberTestData(
-        dec=Decimal("1.123000"), expected_whole_digits=1, expected_dec_places=2
-    ),
-    NumberTestData(
-        dec=Decimal("142.123000"), expected_whole_digits=3, expected_dec_places=2
-    ),
-    NumberTestData(
-        dec=Decimal("142.123"), expected_whole_digits=3, expected_dec_places=2
-    ),
-    NumberTestData(
-        dec=Decimal("142.0123"), expected_whole_digits=3, expected_dec_places=2
-    ),
-    NumberTestData(dec=Decimal("142"), expected_whole_digits=3, expected_dec_places=0),
-    NumberTestData(dec=Decimal("0"), expected_whole_digits=1, expected_dec_places=0),
-    NumberTestData(dec=Decimal("000"), expected_whole_digits=1, expected_dec_places=0),
-    NumberTestData(dec=Decimal("001"), expected_whole_digits=1, expected_dec_places=0),
-    NumberTestData(dec=Decimal("7"), expected_whole_digits=1, expected_dec_places=0),
-    NumberTestData(dec=Decimal("27"), expected_whole_digits=2, expected_dec_places=0),
+    NumberTestData(dec=123.0, expected_whole_digits=3, expected_dec_places=0),
+    NumberTestData(dec=0.0000, expected_whole_digits=1, expected_dec_places=0),
+    NumberTestData(dec=0.70, expected_whole_digits=1, expected_dec_places=1),
+    NumberTestData(dec=0.699, expected_whole_digits=1, expected_dec_places=1),
+    NumberTestData(dec=0.69, expected_whole_digits=1, expected_dec_places=2),
+    NumberTestData(dec=0.123000, expected_whole_digits=1, expected_dec_places=2),
+    NumberTestData(dec=1.123000, expected_whole_digits=1, expected_dec_places=2),
+    NumberTestData(dec=142.123000, expected_whole_digits=3, expected_dec_places=2),
+    NumberTestData(dec=142.123, expected_whole_digits=3, expected_dec_places=2),
+    NumberTestData(dec=142.0123, expected_whole_digits=3, expected_dec_places=2),
+    NumberTestData(dec=142.0, expected_whole_digits=3, expected_dec_places=0),
+    NumberTestData(dec=0.0, expected_whole_digits=1, expected_dec_places=0),
+    NumberTestData(dec=000.0, expected_whole_digits=1, expected_dec_places=0),
+    NumberTestData(dec=001.0, expected_whole_digits=1, expected_dec_places=0),
+    NumberTestData(dec=7.0, expected_whole_digits=1, expected_dec_places=0),
+    NumberTestData(dec=27.0, expected_whole_digits=2, expected_dec_places=0),
+]
+
+print_test_list = [
+    PrintTestData(1.0, 2, 2, "01"),
+    PrintTestData(1.0, 1, 2, "1"),
+    PrintTestData(14.0, 0, 2, "14"),
+    PrintTestData(1.1234, 2, 2, "01.12"),
+    PrintTestData(14.1234, 2, 2, "14.12"),
+    PrintTestData(123.1234, 2, 2, "123.12"),
+    PrintTestData(1.1264, 2, 2, "01.13"),
+    PrintTestData(1.1264, 2, 4, "01.1264"),
+    PrintTestData(1.1264, 0, 4, "1.1264"),
+    PrintTestData(1.1264, 1, 4, "1.1264"),
+    PrintTestData(1.12, 1, 4, "1.1200"),
+    PrintTestData(Decimal("1.0"), 2, 2, "01"),
+    PrintTestData(Decimal("1.0"), 1, 2, "1"),
+    PrintTestData(Decimal("14.0"), 0, 2, "14"),
+    PrintTestData(Decimal("1.1234"), 2, 2, "01.12"),
+    PrintTestData(Decimal("14.1234"), 2, 2, "14.12"),
+    PrintTestData(Decimal("123.1234"), 2, 2, "123.12"),
+    PrintTestData(Decimal("1.1264"), 2, 2, "01.13"),
+    PrintTestData(Decimal("1.1264"), 2, 4, "01.1264"),
+    PrintTestData(Decimal("1.1264"), 0, 4, "1.1264"),
+    PrintTestData(Decimal("1.1264"), 1, 4, "1.1264"),
+    PrintTestData(Decimal("1.12"), 1, 4, "1.1200"),
 ]
 
 
@@ -81,17 +100,13 @@ class TestZeroPadSeries:
             assert count_whole_digits(number.dec) == number.expected_whole_digits
 
     def test_print_result(self) -> None:
-        assert print_result(Decimal("1"), 2, 2) == "01"
-        assert print_result(Decimal("1"), 1, 2) == "1"
-        assert print_result(Decimal("14"), 0, 2) == "14"
-        assert print_result(Decimal("1.1234"), 2, 2) == "01.12"
-        assert print_result(Decimal("14.1234"), 2, 2) == "14.12"
-        assert print_result(Decimal("123.1234"), 2, 2) == "123.12"
-        assert print_result(Decimal("1.1264"), 2, 2) == "01.13"
-        assert print_result(Decimal("1.1264"), 2, 4) == "01.1264"
-        assert print_result(Decimal("1.1264"), 0, 4) == "1.1264"
-        assert print_result(Decimal("1.1264"), 1, 4) == "1.1264"
-        assert print_result(Decimal("1.12"), 1, 4) == "1.1200"
+        for assertion in print_test_list:
+            assert (
+                print_result(
+                    assertion.number, assertion.zero_padding, assertion.decimal_places
+                )
+                == assertion.expected_output
+            )
 
     def test_get_books_in_series(self) -> None:
         assertions: List[BookLookupTestData] = [
@@ -101,12 +116,12 @@ class TestZeroPadSeries:
                     CalibreBook(
                         title="Harry Potter and the Philosopher's Stone",
                         series="Harry Potter",
-                        series_index=str(1),
+                        series_index=1.0,
                     ),
                     CalibreBook(
                         title="Harry Potter and the Chamber of Secrets",
                         series="Harry Potter",
-                        series_index=str(2),
+                        series_index=2.0,
                     ),
                 ],
                 expected_output={
@@ -114,13 +129,13 @@ class TestZeroPadSeries:
                         identifier=0,
                         title="Harry Potter and the Philosopher's Stone",
                         series="Harry Potter",
-                        series_index=Decimal("1"),
+                        series_index=1.0,
                     ),
                     Book(
                         identifier=1,
                         title="Harry Potter and the Chamber of Secrets",
                         series="Harry Potter",
-                        series_index=Decimal("2"),
+                        series_index=2.0,
                     ),
                 },
             ),
@@ -131,12 +146,12 @@ class TestZeroPadSeries:
                     CalibreBook(
                         title="Sword of Destiny",
                         series="The Witcher",
-                        series_index=str(0.6999999),
+                        series_index=0.6999999,
                     ),
                     CalibreBook(
                         title="The Tower of the Swallow",
                         series="The Witcher",
-                        series_index=str(4),
+                        series_index=4.0,
                     ),
                 ],
                 expected_output={
@@ -144,13 +159,13 @@ class TestZeroPadSeries:
                         identifier=0,
                         title="Sword of Destiny",
                         series="The Witcher",
-                        series_index=Decimal("0.6999999"),
+                        series_index=0.6999999,
                     ),
                     Book(
                         identifier=1,
                         title="The Tower of the Swallow",
                         series="The Witcher",
-                        series_index=Decimal("4"),
+                        series_index=4.0,
                     ),
                 },
             ),
@@ -160,12 +175,12 @@ class TestZeroPadSeries:
                     CalibreBook(
                         title="Eye of the World",
                         series="The Wheel of Time",
-                        series_index=str(1),
+                        series_index=1.0,
                     ),
                     CalibreBook(
                         title="A Memory of Light",
                         series="The Wheel of Time",
-                        series_index=str(14),
+                        series_index=14.0,
                     ),
                 ],
                 expected_output={
@@ -173,13 +188,13 @@ class TestZeroPadSeries:
                         identifier=0,
                         title="Eye of the World",
                         series="The Wheel of Time",
-                        series_index=Decimal("1"),
+                        series_index=1.0,
                     ),
                     Book(
                         identifier=1,
                         title="A Memory of Light",
                         series="The Wheel of Time",
-                        series_index=Decimal("14"),
+                        series_index=14.0,
                     ),
                 },
             ),
@@ -204,18 +219,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="Eye of the World",
                     series="The Wheel of Time",
-                    series_index=str(1),
+                    series_index=1.0,
                 ),
                 search_results=[
                     CalibreBook(
                         title="Eye of the World",
                         series="The Wheel of Time",
-                        series_index=str(1),
+                        series_index=1.0,
                     ),
                     CalibreBook(
                         title="A Memory of Light",
                         series="The Wheel of Time",
-                        series_index=str(14),
+                        series_index=14.0,
                     ),
                 ],
                 expected_result="01",
@@ -224,18 +239,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="A Memory of Light",
                     series="The Wheel of Time",
-                    series_index=str(14),
+                    series_index=14.0,
                 ),
                 search_results=[
                     CalibreBook(
                         title="Eye of the World",
                         series="The Wheel of Time",
-                        series_index=str(1),
+                        series_index=1.0,
                     ),
                     CalibreBook(
                         title="A Memory of Light",
                         series="The Wheel of Time",
-                        series_index=str(14),
+                        series_index=14.0,
                     ),
                 ],
                 expected_result="14",
@@ -244,18 +259,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="Sword of Destiny",
                     series="The Witcher",
-                    series_index=str(0.6999999999),
+                    series_index=0.6999999999,
                 ),
                 search_results=[
                     CalibreBook(
                         title="Sword of Destiny",
                         series="The Witcher",
-                        series_index=str(0.6999999999),
+                        series_index=0.6999999999,
                     ),
                     CalibreBook(
                         title="The Tower of the Swallow",
                         series="The Witcher",
-                        series_index=str(4),
+                        series_index=4.0,
                     ),
                 ],
                 expected_result="0.7",
@@ -264,18 +279,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="The Pumpkin of Destiny",
                     series="The Pumpkin Chronicles",
-                    series_index=str(0.75),
+                    series_index=0.75,
                 ),
                 search_results=[
                     CalibreBook(
                         title="The Pumpkin of Destiny",
                         series="The Pumpkin Chronicles",
-                        series_index=str(0.75),
+                        series_index=0.75,
                     ),
                     CalibreBook(
                         title="The Seeds of Regret",
                         series="The Pumpkin Chronicles",
-                        series_index=str(328),
+                        series_index=328.0,
                     ),
                 ],
                 expected_result="000.75",
@@ -284,18 +299,18 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="The Seeds of Regret",
                     series="The Pumpkin Chronicles",
-                    series_index=str(328),
+                    series_index=328.0,
                 ),
                 search_results=[
                     CalibreBook(
                         title="The Pumpkin of Destiny",
                         series="The Pumpkin Chronicles",
-                        series_index=str(0.75),
+                        series_index=0.75,
                     ),
                     CalibreBook(
                         title="The Seeds of Regret",
                         series="The Pumpkin Chronicles",
-                        series_index=str(328),
+                        series_index=328.0,
                     ),
                 ],
                 expected_result="328",
@@ -304,13 +319,13 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="The Pumpkin of Destiny",
                     series="The Pumpkin Chronicles",
-                    series_index=str(0.254),
+                    series_index=0.254,
                 ),
                 search_results=[
                     CalibreBook(
                         title="The Pumpkin of Destiny",
                         series="The Pumpkin Chronicles",
-                        series_index=str(0.254),
+                        series_index=0.254,
                     ),
                 ],
                 expected_result="0.25",
@@ -335,7 +350,7 @@ class TestZeroPadSeries:
                 book=CalibreBook(
                     title="Eye of the World",
                     series="The Wheel of Time",
-                    series_index=str(1),
+                    series_index=1.0,
                 ),
                 context=CalibreContext(
                     calibre_db=CalibreDB(
@@ -343,12 +358,12 @@ class TestZeroPadSeries:
                             CalibreBook(
                                 title="Eye of the World",
                                 series="The Wheel of Time",
-                                series_index=str(1),
+                                series_index=1.0,
                             ),
                             CalibreBook(
                                 title="A Memory of Light",
                                 series="The Wheel of Time",
-                                series_index=str(14),
+                                series_index=14.0,
                             ),
                         ]
                     )

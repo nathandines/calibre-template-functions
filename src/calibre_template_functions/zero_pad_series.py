@@ -1,52 +1,60 @@
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List, Optional, Set, SupportsRound, Union
+from typing import List, Optional, Protocol, Set, Union
 
 
-class CalibreDbApi(ABC):
-    @abstractmethod
+class CalibreDbApi(Protocol):
     def search(self, query: str) -> List[int]:
-        pass
+        ...
 
-    @abstractmethod
     def field_for(
         self, field_name: str, book_id: int, default_return: Optional[str] = None
-    ) -> Union[str, int, float, None]:
-        pass
+    ) -> Optional[Union[str, float]]:
+        ...
 
 
-class CalibreDb(ABC):
-    new_api: CalibreDbApi
+class CalibreDb(Protocol):
+    @property
+    def new_api(self) -> CalibreDbApi:
+        ...
 
 
-class CalibreContext(ABC):
-    arguments: List[str]
+class CalibreContext(Protocol):
+    @property
+    def arguments(self) -> List[str]:
+        ...
 
     @property
-    @abstractmethod
     def db(self) -> CalibreDb:
         ...
 
 
-class CalibreBook(ABC):
-    series: Optional[str]
-    series_index: str
+class CalibreBook(Protocol):
+    @property
+    def series(self) -> Optional[str]:
+        ...
+
+    @property
+    def series_index(self) -> float:
+        ...
 
 
 @dataclass
 class Book:
     identifier: int
     title: str
-    series: Optional[str] = None
-    series_index: Optional[Decimal] = None
+    series_index: float
+    series: Optional[str]
 
     def __hash__(self) -> int:
         return self.identifier
 
 
-def print_result(number: Decimal, zero_padding: int, decimal_places: int) -> str:
+def print_result(
+    number: Union[Decimal, float], zero_padding: int, decimal_places: int
+) -> str:
     """Print result. Integers should not show any decimal places."""
+    number = Decimal(number)
     if number % 1 == 0:
         return "{:0>{zero_padding}d}".format(int(number), zero_padding=zero_padding)
     return "{:0>{zero_padding}.{decimal_places}f}".format(
@@ -56,13 +64,15 @@ def print_result(number: Decimal, zero_padding: int, decimal_places: int) -> str
     )
 
 
-def count_decimal_places(number: SupportsRound[Decimal]) -> int:
+def count_decimal_places(number: Union[Decimal, float]) -> int:
     """Count decimal places to a max of two places"""
+    number = Decimal(number)
     return abs(int(round(number, 2).normalize().as_tuple().exponent))
 
 
-def count_whole_digits(number: Decimal) -> int:
+def count_whole_digits(number: Union[Decimal, float]) -> int:
     """Count whole digits. Minimum of one place returned, even for zero values."""
+    number = Decimal(number)
     num_tuple = number.normalize().as_tuple()
     exponent = int(num_tuple.exponent)
     digits = num_tuple.digits if exponent == 0 else num_tuple.digits[:exponent]
@@ -73,13 +83,21 @@ def get_books_in_series(calibre_db: CalibreDbApi, series_name: str) -> Set[Book]
     book_ids = calibre_db.search(f'series:"={series_name}"')
     output = set()
     for book_id in book_ids:
-        series_index = calibre_db.field_for("series_index", book_id, "")
+        title = calibre_db.field_for("title", book_id)
+        assert isinstance(title, str)
+
+        series = calibre_db.field_for("series", book_id, None)
+        assert isinstance(series, str) or series is None
+
+        series_index = calibre_db.field_for("series_index", book_id)
+        assert isinstance(series_index, float)
+
         output.add(
             Book(
                 identifier=book_id,
-                title=str(calibre_db.field_for("title", book_id, "")),
-                series=str(calibre_db.field_for("series", book_id, "")) or None,
-                series_index=Decimal(series_index) if series_index else None,
+                title=title,
+                series=series,
+                series_index=series_index,
             )
         )
     return output
@@ -92,17 +110,7 @@ def evaluate(book: CalibreBook, context: CalibreContext) -> str:
         return ""
     number = Decimal(context.arguments[0])
     calibre_db = context.db.new_api
-    books: Set[Book] = get_books_in_series(calibre_db, book.series)
-    zero_padding = max(
-        {
-            count_whole_digits(book.series_index) if book.series_index else 0
-            for book in books
-        }
-    )
-    decimal_places = max(
-        {
-            count_decimal_places(book.series_index) if book.series_index else 0
-            for book in books
-        }
-    )
+    books = get_books_in_series(calibre_db, book.series)
+    zero_padding = max({count_whole_digits(book.series_index) for book in books})
+    decimal_places = max({count_decimal_places(book.series_index) for book in books})
     return print_result(number, zero_padding, decimal_places)
