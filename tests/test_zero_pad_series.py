@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List, Set
+from decimal import Decimal
+from typing import List, Set, Union
 
 from calibre_template_functions.zero_pad_series import (
     Book,
@@ -36,6 +37,14 @@ class EvaluateTestData:
     expected_result: str
 
 
+@dataclass
+class PrintTestData:
+    number: Union[Decimal, float]
+    zero_padding: int
+    decimal_places: int
+    expected_output: str
+
+
 number_input_list: List[NumberTestData] = [
     NumberTestData(dec=123.0, expected_whole_digits=3, expected_dec_places=0),
     NumberTestData(dec=0.0000, expected_whole_digits=1, expected_dec_places=0),
@@ -55,6 +64,31 @@ number_input_list: List[NumberTestData] = [
     NumberTestData(dec=27.0, expected_whole_digits=2, expected_dec_places=0),
 ]
 
+print_test_list = [
+    PrintTestData(1.0, 2, 2, "01"),
+    PrintTestData(1.0, 1, 2, "1"),
+    PrintTestData(14.0, 0, 2, "14"),
+    PrintTestData(1.1234, 2, 2, "01.12"),
+    PrintTestData(14.1234, 2, 2, "14.12"),
+    PrintTestData(123.1234, 2, 2, "123.12"),
+    PrintTestData(1.1264, 2, 2, "01.13"),
+    PrintTestData(1.1264, 2, 4, "01.1264"),
+    PrintTestData(1.1264, 0, 4, "1.1264"),
+    PrintTestData(1.1264, 1, 4, "1.1264"),
+    PrintTestData(1.12, 1, 4, "1.1200"),
+    PrintTestData(Decimal("1.0"), 2, 2, "01"),
+    PrintTestData(Decimal("1.0"), 1, 2, "1"),
+    PrintTestData(Decimal("14.0"), 0, 2, "14"),
+    PrintTestData(Decimal("1.1234"), 2, 2, "01.12"),
+    PrintTestData(Decimal("14.1234"), 2, 2, "14.12"),
+    PrintTestData(Decimal("123.1234"), 2, 2, "123.12"),
+    PrintTestData(Decimal("1.1264"), 2, 2, "01.13"),
+    PrintTestData(Decimal("1.1264"), 2, 4, "01.1264"),
+    PrintTestData(Decimal("1.1264"), 0, 4, "1.1264"),
+    PrintTestData(Decimal("1.1264"), 1, 4, "1.1264"),
+    PrintTestData(Decimal("1.12"), 1, 4, "1.1200"),
+]
+
 
 class TestZeroPadSeries:
     def test_count_decimal_places(self) -> None:
@@ -66,17 +100,13 @@ class TestZeroPadSeries:
             assert count_whole_digits(number.dec) == number.expected_whole_digits
 
     def test_print_result(self) -> None:
-        assert print_result(1.0, 2, 2) == "01"
-        assert print_result(1.0, 1, 2) == "1"
-        assert print_result(14.0, 0, 2) == "14"
-        assert print_result(1.1234, 2, 2) == "01.12"
-        assert print_result(14.1234, 2, 2) == "14.12"
-        assert print_result(123.1234, 2, 2) == "123.12"
-        assert print_result(1.1264, 2, 2) == "01.13"
-        assert print_result(1.1264, 2, 4) == "01.1264"
-        assert print_result(1.1264, 0, 4) == "1.1264"
-        assert print_result(1.1264, 1, 4) == "1.1264"
-        assert print_result(1.12, 1, 4) == "1.1200"
+        for assertion in print_test_list:
+            assert (
+                print_result(
+                    assertion.number, assertion.zero_padding, assertion.decimal_places
+                )
+                == assertion.expected_output
+            )
 
     def test_get_books_in_series(self) -> None:
         assertions: List[BookLookupTestData] = [
