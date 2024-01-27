@@ -6,24 +6,17 @@ on:
         required: false
         description: Command to run in pyenv
         type: string
-      cached:
-        required: false
-        default: false
-        description: Whether to rely on cached dependencies (i.e. don't run Poetry)
-        type: boolean
 
 jobs:
   pyenv-workflow:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - if: ${{ ! inputs.cached }}
-        run: pipx install poetry
+      - run: pipx install poetry
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version
           cache: poetry
-      - if: ${{ ! inputs.cached }}
-        run: poetry install
+      - run: poetry install
       - if: ${{ inputs.run_command != '' }}
         run: ${{ inputs.run_command }}
