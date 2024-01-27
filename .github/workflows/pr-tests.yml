@@ -3,16 +3,24 @@ on:
   - pull_request
 
 jobs:
-  lint-and-test:
+  python-deps:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - run: pipx install poetry
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version
-      - run: pip install poetry
+          cache: poetry
       - run: poetry install
+      # - run: poetry run mypy .
+      # - run: poetry run ruff check --output-format=github .
+      # - run: poetry run ruff format --check .
+      # - run: poetry run pytest -v
+  mypy:
+    runs-on: ubuntu-22.04
+    needs: [python-deps]
+    steps:
+      - uses: actions/checkout@v4
+      - run: python --version
       - run: poetry run mypy .
-      - run: poetry run ruff check --output-format=github .
-      - run: poetry run ruff format --check .
-      - run: poetry run pytest -v
