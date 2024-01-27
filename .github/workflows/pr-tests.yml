@@ -10,22 +10,18 @@ jobs:
     uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run mypy .
-      cached: true
   linter-ruff:
     needs: [python-deps]
     uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run ruff check --output-format=github .
-      cached: true
   formatter-ruff:
     needs: [python-deps]
     uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run ruff format --check .
-      cached: true
   tests-pytest:
     needs: [python-deps]
     uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run pytest -v --cov=. .
-      cached: true
