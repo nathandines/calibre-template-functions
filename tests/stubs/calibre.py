@@ -24,7 +24,7 @@ class DbApi:
         )
         if return_val:
             return return_val
-        return default_return
+        return default_return  # pragma: no cover
 
 
 @dataclass

@@ -24,4 +24,4 @@ jobs:
     needs: [python-deps]
     uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
-      run_command: poetry run pytest -v
+      run_command: poetry run pytest -v --cov=. .

@@ -12,6 +12,7 @@ python = "^3.8"
 pytest = "^7.4.4"
 ruff = "^0.1.13"
 mypy = "^1.8.0"
+pytest-cov = "^4.1.0"
 
 [tool.ruff]
 extend-select = ["I"]
@@ -20,6 +21,14 @@ extend-select = ["I"]
 strict = true
 warn_redundant_casts = true
 warn_unused_ignores = true
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_also = ["^\\s*\\.{3}$"]
+fail_under = 100.0
+show_missing = true
 
 [build-system]
 requires = ["poetry-core"]
