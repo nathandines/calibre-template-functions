@@ -22,5 +22,6 @@ jobs:
     needs: [python-deps]
     steps:
       - uses: actions/checkout@v4
+      - run: pipx install poetry
       - run: python --version
       - run: poetry run mypy .
