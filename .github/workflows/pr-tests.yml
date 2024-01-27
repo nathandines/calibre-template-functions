@@ -4,24 +4,24 @@ on:
 
 jobs:
   python-deps:
-    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@parallel-tests
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
   linter-mypy:
     needs: [python-deps]
-    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@parallel-tests
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run mypy .
   linter-ruff:
     needs: [python-deps]
-    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@parallel-tests
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run ruff check --output-format=github .
   formatter-ruff:
     needs: [python-deps]
-    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@parallel-tests
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run ruff format --check .
   tests-pytest:
     needs: [python-deps]
-    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@parallel-tests
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
     with:
       run_command: poetry run pytest -v
