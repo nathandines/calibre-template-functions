@@ -3,16 +3,25 @@ on:
   - pull_request
 
 jobs:
-  lint-and-test:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version
-      - run: pip install poetry
-      - run: poetry install
-      - run: poetry run mypy .
-      - run: poetry run ruff check --output-format=github .
-      - run: poetry run ruff format --check .
-      - run: poetry run pytest -v
+  python-deps:
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
+  linter-mypy:
+    needs: [python-deps]
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
+    with:
+      run_command: poetry run mypy .
+  linter-ruff:
+    needs: [python-deps]
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
+    with:
+      run_command: poetry run ruff check --output-format=github .
+  formatter-ruff:
+    needs: [python-deps]
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
+    with:
+      run_command: poetry run ruff format --check .
+  tests-pytest:
+    needs: [python-deps]
+    uses: nathandines/calibre-template-functions/.github/workflows/run_in_pyenv.yml@main
+    with:
+      run_command: poetry run pytest -v

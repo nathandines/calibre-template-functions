@@ -1,0 +1,22 @@
+---
+on:
+  workflow_call:
+    inputs:
+      run_command:
+        required: false
+        description: Command to run in pyenv
+        type: string
+
+jobs:
+  pyenv-workflow:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx install poetry
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: poetry
+      - run: poetry install
+      - if: ${{ inputs.run_command != '' }}
+        run: ${{ inputs.run_command }}
